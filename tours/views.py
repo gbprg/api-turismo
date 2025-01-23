@@ -1,4 +1,4 @@
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework import viewsets, permissions
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
@@ -22,10 +22,11 @@ class TourListView(ListAPIView):
     serializer_class = TourSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-class TourDetailView(ListAPIView):
-    queryset = Tour.objects.all()
+class TourDetailView(RetrieveAPIView):  # Change to RetrieveAPIView
+    queryset = Tour.objects.prefetch_related('images')
     serializer_class = TourSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    lookup_url_kwarg = 'pk'  # Specify lookup field
 
 class AvailableToursSchedulesView(ListAPIView):
     serializer_class = TourScheduleSerializer
@@ -33,11 +34,7 @@ class AvailableToursSchedulesView(ListAPIView):
 
     def get_queryset(self):
         tour_id = self.kwargs['tour_id']
-        date = self.request.query_params.get('date', None)
-
-        print("Tour ID:", tour_id)
-        print("Data atual:", now().date())
-        print("Data recebida:", date)
+        date = self.request.query_params.get('date')
 
         queryset = TourSchedule.objects.filter(
             tour_id=tour_id,
@@ -49,9 +46,7 @@ class AvailableToursSchedulesView(ListAPIView):
         if date:
             queryset = queryset.filter(date=date)
         
-        print("Queryset retornado:", queryset)
         return queryset
-            
             
     
 class BookingCreateView(APIView):

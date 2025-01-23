@@ -16,6 +16,20 @@ class Tour(models.Model):
 
   def __str__(self):
     return self.title
+  def get_gallery_images(self):
+    return self.images.all()
+  
+# GALERIA DE IMAGENS
+class TourImage(models.Model):
+    tour = models.ForeignKey(Tour, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='tour_gallery/')
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+        
+    def __str__(self):
+        return f"Image for {self.tour.title}"    
   
 # MOTORISTAS
 class Driver(models.Model):

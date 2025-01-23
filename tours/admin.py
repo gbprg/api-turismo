@@ -1,9 +1,15 @@
 from django.contrib import admin
-from .models import Tour, Driver, TourSchedule
+from .models import Tour, Driver, TourSchedule, TourImage
 
 # Register your models here.
+class TourImageInline(admin.TabularInline):
+    model = TourImage
+    extra = 3  # Allows adding multiple images
 
-admin.site.register(Tour)
+class TourAdmin(admin.ModelAdmin):
+    inlines = [TourImageInline]
+
+admin.site.register(Tour, TourAdmin)
 
 @admin.register(Driver)
 class DriverAdmin(admin.ModelAdmin):
