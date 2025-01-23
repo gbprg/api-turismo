@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Tour, TourSchedule
 from .serializers import TourSerializer, TourScheduleSerializer
+from django.utils.timezone import now
 
 # Create your views here.
 
@@ -21,15 +22,37 @@ class TourListView(ListAPIView):
     serializer_class = TourSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-class AvailableTousSchedulesView(ListAPIView):
+class TourDetailView(ListAPIView):
+    queryset = Tour.objects.all()
+    serializer_class = TourSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class AvailableToursSchedulesView(ListAPIView):
     serializer_class = TourScheduleSerializer
     permission_classes = [permissions.AllowAny]
-    
+
     def get_queryset(self):
-        return TourSchedule.objects.filter(
+        tour_id = self.kwargs['tour_id']
+        date = self.request.query_params.get('date', None)
+
+        print("Tour ID:", tour_id)
+        print("Data atual:", now().date())
+        print("Data recebida:", date)
+
+        queryset = TourSchedule.objects.filter(
+            tour_id=tour_id,
             is_active=True,
-            available_seats__gt=0
+            available_seats__gt=0,
+            date__gte=now().date()
         ).select_related('tour', 'driver')
+
+        if date:
+            queryset = queryset.filter(date=date)
+        
+        print("Queryset retornado:", queryset)
+        return queryset
+            
+            
     
 class BookingCreateView(APIView):
     def post(self, request):

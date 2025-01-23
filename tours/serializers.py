@@ -7,6 +7,9 @@ class TourSerializer(serializers.ModelSerializer):
     model = Tour
     fields = ['id', 'title', 'description', 'price', 'image', 'status_promotion']
 
+    def get_image(self, obj):
+      return obj.image.url if obj.image else '/path/to/default/image.jpg'
+
 class DriverSerializer(serializers.ModelSerializer):
     class Meta:
       model = Driver
